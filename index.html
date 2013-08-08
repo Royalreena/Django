@@ -1,0 +1,306 @@
+{% extends "incident/base_report.html" %}
+
+{% block js-custom %}
+{{ block.super }}
+<script type="text/javascript">
+    $(document).ready(function(){
+     //   var form = $('#reporter-form');
+        //open popup
+        $("#reset").click(function(){
+            $("#add_background").show('fast').css('display','inline');
+            $("#overlay_form").fadeIn(1000);
+            $("#reset_password").val("");
+            $("#old_password").val("");
+            positionPopup();
+            $("#old_password").focus();
+        });
+        //close popup
+        $("#close").click(function(){
+            $("#overlay_form").fadeOut(500);
+            $("#add_background").fadeOut(500);
+        });
+
+        $('.openDiv').click(function () {       
+        alert(1)     
+        var id = $(this).attr('id');  
+        var csrf_token = $("#csrf_token").val();
+        $.ajax({ 
+           data:{
+                csrfmiddlewaretoken: ('{{csrf_token}}'),   
+               // form:form.serialize(),            
+                id:id,
+                
+                },
+        type:'POST',
+        url: '/setting/save-reporter/',
+        success: function() {
+            $('#authorisedreporter').show();
+        }
+      });
+     });
+
+    });
+</script>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $("#authorised_reporter").hide();
+     
+    });
+
+</script>
+{% if is_member_screen%}
+<script type="text/javascript">
+    $(document).ready(function () {
+        $(this).removeClass('authorised_reportericon').addClass('authorised_reporter');
+        $("#account_holder").removeClass('account_holder').addClass('account_holdericon');
+        $("#authorised_reporter").show();
+        $("#main_account").hide();
+    })
+</script>
+{% endif%}
+{% endblock %}
+
+{% block css-custom %}
+{{ block.super }}
+<style>
+    table{
+         border-collapse: separate;
+     }
+    #id_security_question {
+        width: 250px;
+    }
+    #category p{
+        margin:10px;
+    }
+    .account_holder, .authorised_reporter{
+        background: url('{{ STATIC_URL }}images/main_image.png' )no-repeat;
+        cursor:pointer;
+    }
+    .account_holdericon, .authorised_reportericon{
+        background: url('{{ STATIC_URL }}images/authorised.png')no-repeat;
+        cursor:pointer;
+    }
+
+    .authorised_reporter,.authorised_reportericon{
+        border-top-right-radius: 10px;
+    }
+    .authorised_reporter,.account_holdericon,
+    .authorised_reportericon,.account_holder{
+        font-size:16px;
+        color:#561886;
+        font-weight:bold;
+        padding-top:15px;
+        text-align:center;
+    }
+
+    table #member{
+        border-collapse: inherit;
+        border-spacing:1px;
+    }
+</style>
+{% endblock %}
+
+{% block main-content %}
+<div id="settings-wrapper">
+<div id="settings-left">
+    {% include "setting/settings_leftbar.html" %}
+</div>
+<div id="settings-right">
+    <table width="98%" border="0" style="margin-left:0.7%;" cellpadding="0" cellspacing="0" id="rounded_table">
+        <tr>
+            <td width="60%">
+                <table width="100%"  cellpadding="0" cellspacing="0" id="rounded_border" style="padding-top:5px;">
+                    <tr >
+                        <td id="account_holder" class="account_holder" width="50%">
+                        <p align="center">Main Account Holder</p></td>
+
+                        <td id="authorised_reportericon" class="authorised_reportericon" width="50%">
+
+                            <p align="center" >Authorised Reporters</p>
+                        </td>
+                    </tr>
+                    <form method="post" action=".">
+                        {% csrf_token %}
+                        <tr id="main_account">
+                            <td width="50%">
+                                {% if profile_save_msg != '' %}
+                                <p class="success_msg"><strong>{{ profile_save_msg }}</strong></p>
+                                {% endif %}
+
+                                <table width="270">
+                                    <tr>
+                                        <td>First name:</td><td>{{ userform.first_name }}{{ userform.first_name.errors }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Last name:</td><td>{{ userform.last_name }}{{ userform.last_name.errors }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Daytime phone:</td><td>{{ form.phone_daytime }}{{ form.phone_daytime.errors }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Mobile phone:</td><td>{{ form.phone_mobile }}{{ form.phone_mobile.errors }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Email:</td><td>{{ userform.email }}{{ userform.phone_mobile.errors }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td colspan="2">{% include "buttons/reset.html" %}
+                                            {% if pwd_error %}
+                                            <div class="errorlist" style="margin-top:5px;"> {{pwd_error}}</div>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                </table><br />
+                                <table>
+                                    <tr>
+                                        <td><h3>Security Question</h3></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Question:</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ form.security_question }}<br />Eg.Name of first pet</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Answer:</td>
+                                    </tr>
+                                    <tr>
+                                        <td>{{ form.security_answer }}<br />Eg.Spot(not case sensitive)</td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td width="50%">
+                                <table>
+                                    <tr>
+                                        <td colspan="2"><h3>Work details</h3></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Organisation:</td><td> {{ form.organisation }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Industry Type:</td><td>{{ form.industrytype }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Street:</td><td>{{ form.work_street }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Suburb:</td><td>{{ form.work_suburb }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Postcode:</td><td>{{ form.work_postcode }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Country:</td><td>{{ form.work_country }}</td>
+                                    </tr>
+                                </table>
+
+                                <table>
+                                    <tr>
+                                        <td colspan="2"><h3>Work postal</h3></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Postal address:</td><td> {{ form.post_street }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Suburb</td><td>{{ form.post_suburb }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Postcode</td><td>{{ form.post_postcode }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Country</td><td>{{ form.post_country }}</td>
+                                    </tr>
+                                </table>
+                                <p style=margin-top:1.2cm;>{% include "buttons/save.html" %}</p>
+                            </td>
+                        </tr>
+                    </form>
+
+                    <tr id="authorised_reporter">
+                        <td  width="100%" colspan="2">
+                            {% if member_save_msg != '' %}
+                                <p class="success_msg"><strong>{{ member_save_msg }}</strong></p>
+                          {% endif %}
+                            {% if not registerform.errors %}<button type="submit" id="add" class="button_style"  onclick="addreporter();" value="Add New Authorised Reporter">Add New Authorised Reporter</button>{% endif %}
+                            <div id="authorisedreporter" {% if not registerform.errors %}style="display:none"{% endif %}>
+                               <form method="post" action="." id="reporter-form">
+                                    {% csrf_token %}
+                                    <table  width="100%">
+                                        <tr>
+                                            <td style="width:100px;">First name:</td><td>{{registerform.first_name}} {{registerform.first_name.errors}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Last name:</td><td>{{registerform.last_name}} {{registerform.last_name.errors}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Daytime phone:</td><td>{{createprofile.phone_daytime}} {{createprofile.phone_daytime.errors}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Mobile phone:</td><td>{{createprofile.phone_mobile}} {{createprofile.phone_mobile.errors}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Email:</td><td>{{registerform.email}} {{registerform.email.errors}}</td>
+                                        </tr>
+                                        {{registerform.username.as_hidden}}
+                                        <tr>
+                                            <td>Password</td><td>{{registerform.password}} {{registerform.password.errors}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan=2"">{%if not userprofile.is_system_admin %}<input type="checkbox" name="is_system_admin" style="margin: 0;vertical-align:middle"/> System Administrator{%endif%}
+                                                <p align="right">{% include "buttons/save.html" %}</p>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                
+                            </div>
+                            {% if member_list%}
+                                <table>
+                                    <tr><td style="height:50px;"colspan="2" valign="center" >
+                                            <table cellspacing="2" cellpadding="0" id="member">
+                                                {% for list in member_list %}
+                                                <tr class="ir-shade"> 
+                                                    <td style="width:120px;"><span><input type="submit" name="delete" value="{{list.0.id}}" class="delete_reporter" /></span><button type="button" id="{{ list.0.id }}" class="openDiv">{{list.0.first_name|title}} {{list.0.last_name}}</button></td>
+                                                    <td style="width:410px;"> {{list.0.email}} {{list.1.phone_daytime}} {{list.1.phone_mobile}}
+                                                        {% if list.1.is_system_admin == 1 %}
+                                                        System Administrator
+                                                    {% endif %}</td>
+                                                </tr>
+                                                {% endfor %}
+                                            </table>
+                                        </td>
+                                    </tr>
+
+                                </table><br />
+                            {% endif%}</form>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</div>
+</div>
+
+<div id="add_background" class="hidebackground" style="display:none">
+</div>
+<div id="overlay_form" style="display:none">
+    <form  method="post" action="." >
+        {% csrf_token %}
+        <h2> Reset Password</h2>
+        <br />
+        Old Password <br />
+        <input type="text" name="old_password" id="old_password" maxlength="30" /><br /><br />
+        New Password <br />
+        <input type="text" name="reset_password" id="reset_password" maxlength="30" /><br />
+        <div id="error" class="errorlist"> </div>
+        <div style="width:180px;float:right;margin:20px 5px 0 10px">
+            {% include "buttons/save.html" %}
+            <button style="margin-right:10px;" type="button" id="close" name="cancel" class="forward backicon">
+                <img src="{{ STATIC_URL }}images/button-icon-ir-back.png" width="12" height="17" alt="" />
+            Cancel</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block report-header %}
+{% endblock %}
